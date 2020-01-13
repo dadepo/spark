@@ -24,7 +24,6 @@ import java.util.zip.Adler32
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 import scala.util.Random
-
 import org.apache.spark._
 import org.apache.spark.internal.Logging
 import org.apache.spark.io.CompressionCodec
@@ -123,8 +122,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
     if (!blockManager.putSingle(broadcastId, value, MEMORY_AND_DISK, tellMaster = false)) {
       throw new SparkException(s"Failed to store $broadcastId in BlockManager")
     }
-    val blocks =
-      TorrentBroadcast.blockifyObject(value, blockSize, SparkEnv.get.serializer, compressionCodec)
+    val blocks = TorrentBroadcast.blockifyObject(value, blockSize, SparkEnv.get.serializer, compressionCodec)
     if (checksumEnabled) {
       checksums = new Array[Int](blocks.length)
     }
@@ -284,9 +282,13 @@ private object TorrentBroadcast extends Logging {
       serializer: Serializer,
       compressionCodec: Option[CompressionCodec]): Array[ByteBuffer] = {
     val cbbos = new ChunkedByteBufferOutputStream(blockSize, ByteBuffer.allocate)
-    val out = compressionCodec.map(c => c.compressedOutputStream(cbbos)).getOrElse(cbbos)
+
+    val out:OutputStream = cbbos
+
     val ser = serializer.newInstance()
+
     val serOut = ser.serializeStream(out)
+
     Utils.tryWithSafeFinally {
       serOut.writeObject[T](obj)
     } {

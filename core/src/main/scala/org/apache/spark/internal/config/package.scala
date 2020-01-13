@@ -26,6 +26,10 @@ import org.apache.spark.util.Utils
 
 package object config {
 
+  private[spark] val USE_DEFAULT_EVERYWHERE = ConfigBuilder("use.default.everywhere")
+    .booleanConf
+    .createWithDefault(false)
+
   private[spark] val DRIVER_CLASS_PATH =
     ConfigBuilder(SparkLauncher.DRIVER_EXTRA_CLASSPATH).stringConf.createOptional
 

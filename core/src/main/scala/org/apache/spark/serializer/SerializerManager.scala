@@ -39,6 +39,9 @@ private[spark] class SerializerManager(
 
   def this(defaultSerializer: Serializer, conf: SparkConf) = this(defaultSerializer, conf, None)
 
+  private[this]  val useDefaultEverywhere: Boolean = conf
+    .getBoolean("use.default.everywhere", defaultValue = true)
+
   private[this] val kryoSerializer = new KryoSerializer(conf)
 
   def setDefaultClassLoader(classLoader: ClassLoader): Unit = {
@@ -88,7 +91,11 @@ private[spark] class SerializerManager(
   // result is streaming job based on `Receiver` mode can not run on Spark 2.x properly. It may be
   // a rational choice to close `kryo auto pick` feature for streaming in the first step.
   def getSerializer(ct: ClassTag[_], autoPick: Boolean): Serializer = {
-    if (autoPick && canUseKryo(ct)) {
+    if (useDefaultEverywhere) {
+      println("os3: using default serializer everywhere")
+    }
+
+    if (!useDefaultEverywhere && autoPick && canUseKryo(ct)) {
       kryoSerializer
     } else {
       defaultSerializer
@@ -99,7 +106,11 @@ private[spark] class SerializerManager(
    * Pick the best serializer for shuffling an RDD of key-value pairs.
    */
   def getSerializer(keyClassTag: ClassTag[_], valueClassTag: ClassTag[_]): Serializer = {
-    if (canUseKryo(keyClassTag) && canUseKryo(valueClassTag)) {
+    if (useDefaultEverywhere) {
+      println("os3: using default serializer everywhere")
+    }
+
+    if (!useDefaultEverywhere && canUseKryo(keyClassTag) && canUseKryo(valueClassTag)) {
       kryoSerializer
     } else {
       defaultSerializer

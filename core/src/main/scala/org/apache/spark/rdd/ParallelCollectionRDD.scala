@@ -24,9 +24,8 @@ import scala.collection.Map
 import scala.collection.immutable.NumericRange
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
-
 import org.apache.spark._
-import org.apache.spark.serializer.JavaSerializer
+import org.apache.spark.serializer.{IbisSerializer, JavaSerializer}
 import org.apache.spark.util.Utils
 
 private[spark] class ParallelCollectionPartition[T: ClassTag](
@@ -57,6 +56,7 @@ private[spark] class ParallelCollectionPartition[T: ClassTag](
 
     sfactory match {
       case js: JavaSerializer => out.defaultWriteObject()
+      case js: IbisSerializer => out.defaultWriteObject()
       case _ =>
         out.writeLong(rddId)
         out.writeInt(slice)
@@ -72,6 +72,7 @@ private[spark] class ParallelCollectionPartition[T: ClassTag](
     val sfactory = SparkEnv.get.serializer
     sfactory match {
       case js: JavaSerializer => in.defaultReadObject()
+      case js: IbisSerializer => in.defaultReadObject()
       case _ =>
         rddId = in.readLong()
         slice = in.readInt()
