@@ -1,5 +1,7 @@
 # Apache Spark
 
+**Switch to _v2.4.4-with-ibis_ branch for changes that include Ibis serialzation.**
+
 Spark is a unified analytics engine for large-scale data processing. It provides
 high-level APIs in Scala, Java, Python, and R, and an optimized engine that
 supports general computation graphs for data analysis. It also supports a
