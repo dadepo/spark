@@ -414,14 +414,14 @@
 
       <!-- ibis dependencies -->
       <dependency>
-          <groupId>ipl</groupId>
-          <artifactId>ibis-io</artifactId>
+          <groupId>ipl-spark</groupId>
+          <artifactId>ibis-spark-io</artifactId>
           <version>2.3.3</version>
       </dependency>
 
       <dependency>
-          <groupId>ipl</groupId>
-          <artifactId>ibis-util</artifactId>
+          <groupId>ipl-spark</groupId>
+          <artifactId>ibis-spark-util</artifactId>
           <version>2.3.3</version>
       </dependency>
 
