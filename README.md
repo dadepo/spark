@@ -1,3 +1,7 @@
+# Using Apache Spark with IPL Serialization
+
+Please switch to [v2.4.4-with-ibis](https://github.com/dadepo/spark/tree/v2.4.4-with-ibis) branch for more instructions
+
 # Apache Spark
 
 **Switch to _v2.4.4-with-ibis_ branch for changes that include Ibis serialzation.**
