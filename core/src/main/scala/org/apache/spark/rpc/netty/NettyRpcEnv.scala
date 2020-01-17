@@ -22,13 +22,13 @@ import java.nio.ByteBuffer
 import java.nio.channels.{Pipe, ReadableByteChannel, WritableByteChannel}
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
+
 import javax.annotation.Nullable
 
 import scala.concurrent.{Future, Promise}
 import scala.reflect.ClassTag
 import scala.util.{DynamicVariable, Failure, Success, Try}
 import scala.util.control.NonFatal
-
 import org.apache.spark.{SecurityManager, SparkConf}
 import org.apache.spark.internal.Logging
 import org.apache.spark.network.TransportContext
@@ -37,15 +37,15 @@ import org.apache.spark.network.crypto.{AuthClientBootstrap, AuthServerBootstrap
 import org.apache.spark.network.netty.SparkTransportConf
 import org.apache.spark.network.server._
 import org.apache.spark.rpc._
-import org.apache.spark.serializer.{JavaSerializer, JavaSerializerInstance, SerializationStream}
+import org.apache.spark.serializer.{IbisSerializer, IbisSerializerInstance, JavaSerializer, JavaSerializerInstance, SerializationStream}
 import org.apache.spark.util.{ByteBufferInputStream, ByteBufferOutputStream, ThreadUtils, Utils}
 
 private[netty] class NettyRpcEnv(
-    val conf: SparkConf,
-    javaSerializerInstance: JavaSerializerInstance,
-    host: String,
-    securityManager: SecurityManager,
-    numUsableCores: Int) extends RpcEnv(conf) with Logging {
+                                  val conf: SparkConf,
+                                  ibisSerializerInstance: IbisSerializerInstance,
+                                  host: String,
+                                  securityManager: SecurityManager,
+                                  numUsableCores: Int) extends RpcEnv(conf) with Logging {
 
   private[netty] val transportConf = SparkTransportConf.fromSparkConf(
     conf.clone.set("spark.rpc.io.numConnectionsPerPeer", "1"),
@@ -255,20 +255,20 @@ private[netty] class NettyRpcEnv(
   }
 
   private[netty] def serialize(content: Any): ByteBuffer = {
-    javaSerializerInstance.serialize(content)
+    ibisSerializerInstance.serialize(content)
   }
 
   /**
    * Returns [[SerializationStream]] that forwards the serialized bytes to `out`.
    */
   private[netty] def serializeStream(out: OutputStream): SerializationStream = {
-    javaSerializerInstance.serializeStream(out)
+    ibisSerializerInstance.serializeStream(out)
   }
 
   private[netty] def deserialize[T: ClassTag](client: TransportClient, bytes: ByteBuffer): T = {
     NettyRpcEnv.currentClient.withValue(client) {
       deserialize { () =>
-        javaSerializerInstance.deserialize[T](bytes)
+        ibisSerializerInstance.deserialize[T](bytes)
       }
     }
   }
@@ -455,10 +455,9 @@ private[rpc] class NettyRpcEnvFactory extends RpcEnvFactory with Logging {
     val sparkConf = config.conf
     // Use JavaSerializerInstance in multiple threads is safe. However, if we plan to support
     // KryoSerializer in future, we have to use ThreadLocal to store SerializerInstance
-    val javaSerializerInstance =
-      new JavaSerializer(sparkConf).newInstance().asInstanceOf[JavaSerializerInstance]
+    val ibisSerializerInstance = new IbisSerializer(sparkConf).newInstance().asInstanceOf[IbisSerializerInstance]
     val nettyEnv =
-      new NettyRpcEnv(sparkConf, javaSerializerInstance, config.advertiseAddress,
+      new NettyRpcEnv(sparkConf, ibisSerializerInstance, config.advertiseAddress,
         config.securityManager, config.numUsableCores)
     if (!config.clientMode) {
       val startNettyRpcEnv: Int => (NettyRpcEnv, Int) = { actualPort =>

@@ -75,13 +75,13 @@ private[spark] class IbisSerializerInstance(counterReset: Int,
   }
 
   override def deserialize[T: ClassTag](bytes: ByteBuffer): T = {
-    val bis = new ByteArrayInputStream(bytes.array())
+    val bis = new ByteArrayInputStream(byteBufferToByteArray(bytes))
     val in = deserializeStream(bis)
     in.readObject()
   }
 
   override def deserialize[T: ClassTag](bytes: ByteBuffer, loader: ClassLoader): T = {
-    val bis = new ByteArrayInputStream(bytes.array())
+    val bis = new ByteArrayInputStream(byteBufferToByteArray(bytes))
     val in = deserializeStream(bis, loader)
     in.readObject()
   }
@@ -96,6 +96,12 @@ private[spark] class IbisSerializerInstance(counterReset: Int,
 
   def deserializeStream(s: InputStream, loader: ClassLoader): DeserializationStream = {
     new IbisDeserializationStream(s, loader)
+  }
+
+  private[this] def byteBufferToByteArray(bytes: ByteBuffer):Array[Byte] = {
+    val bytesArray= Array.fill[Byte](bytes.remaining())(0)
+    bytes.get(bytesArray, 0, bytesArray.length)
+    bytesArray
   }
 }
 

@@ -81,8 +81,7 @@ abstract class PersistenceEngine {
    * Returns the persisted data sorted by their respective ids (which implies that they're
    * sorted by time of creation).
    */
-  final def readPersistedData(
-      rpcEnv: RpcEnv): (Seq[ApplicationInfo], Seq[DriverInfo], Seq[WorkerInfo]) = {
+  final def readPersistedData(rpcEnv: RpcEnv): (Seq[ApplicationInfo], Seq[DriverInfo], Seq[WorkerInfo]) = {
     rpcEnv.deserialize { () =>
       (read[ApplicationInfo]("app_"), read[DriverInfo]("driver_"), read[WorkerInfo]("worker_"))
     }

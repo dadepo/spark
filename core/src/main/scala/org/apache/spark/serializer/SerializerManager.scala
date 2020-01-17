@@ -40,7 +40,7 @@ private[spark] class SerializerManager(
   def this(defaultSerializer: Serializer, conf: SparkConf) = this(defaultSerializer, conf, None)
 
   private[this]  val useDefaultEverywhere: Boolean = conf
-    .getBoolean("use.default.everywhere", defaultValue = true)
+    .getBoolean("use.default.everywhere", defaultValue = false)
 
   private[this] val kryoSerializer = new KryoSerializer(conf)
 
