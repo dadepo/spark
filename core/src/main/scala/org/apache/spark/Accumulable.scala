@@ -21,9 +21,8 @@ import java.io.Serializable
 
 import scala.collection.generic.Growable
 import scala.reflect.ClassTag
-
 import org.apache.spark.scheduler.AccumulableInfo
-import org.apache.spark.serializer.JavaSerializer
+import org.apache.spark.serializer.IbisSerializer
 import org.apache.spark.util.{AccumulatorContext, AccumulatorMetadata, LegacyAccumulatorWrapper}
 
 
@@ -218,7 +217,7 @@ GrowableAccumulableParam[R : ClassTag, T]
   def zero(initialValue: R): R = {
     // We need to clone initialValue, but it's hard to specify that R should also be Cloneable.
     // Instead we'll serialize it to a buffer and load it back.
-    val ser = new JavaSerializer(new SparkConf(false)).newInstance()
+    val ser = new IbisSerializer(new SparkConf(false)).newInstance()
     val copy = ser.deserialize[R](ser.serialize(initialValue))
     copy.clear()   // In case it contained stuff
     copy

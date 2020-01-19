@@ -190,7 +190,7 @@ object SerializerSupport {
     val s = if (useKryo) {
       new KryoSerializer(conf)
     } else {
-      new JavaSerializer(conf)
+      new IbisSerializer(conf)
     }
     s.newInstance()
   }
