@@ -39,6 +39,7 @@ private[spark] class IbisSerializationStream(out: OutputStream,
 
   /** The most general-purpose method to write an object. */
   override def writeObject[T: ClassTag](t: T): SerializationStream = {
+    SLogger.log("ibis","write")
     try {
       objOut.writeObject(t)
       flush()
@@ -99,9 +100,13 @@ private[spark] class IbisSerializerInstance(counterReset: Int,
   }
 
   private[this] def byteBufferToByteArray(bytes: ByteBuffer):Array[Byte] = {
-    val bytesArray= Array.fill[Byte](bytes.remaining())(0)
-    bytes.get(bytesArray, 0, bytesArray.length)
-    bytesArray
+    if (bytes.hasArray) {
+      bytes.array()
+    } else {
+      val bytesArray= Array.fill[Byte](bytes.remaining())(0)
+      bytes.get(bytesArray, 0, bytesArray.length)
+      bytesArray
+    }
   }
 }
 
@@ -125,6 +130,7 @@ private[spark] class IbisDeserializationStream(in: InputStream, loader: ClassLoa
 
   /** The most general-purpose method to read an object. */
   override def readObject[T: ClassTag](): T = {
+    SLogger.log("ibis","read")
     objIn.readObject().asInstanceOf[T]
   }
 

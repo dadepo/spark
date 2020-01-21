@@ -39,6 +39,7 @@ private[spark] class JavaSerializationStream(
    * the stream 'resets' object class descriptions have to be re-written)
    */
   def writeObject[T: ClassTag](t: T): SerializationStream = {
+    SLogger.log("java","write")
     try {
       objOut.writeObject(t)
     } catch {
@@ -72,7 +73,10 @@ private[spark] class JavaDeserializationStream(in: InputStream, loader: ClassLoa
       }
   }
 
-  def readObject[T: ClassTag](): T = objIn.readObject().asInstanceOf[T]
+  def readObject[T: ClassTag](): T = {
+    SLogger.log("java","read")
+    objIn.readObject().asInstanceOf[T]
+  }
   def close() { objIn.close() }
 }
 

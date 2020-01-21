@@ -242,6 +242,7 @@ class KryoSerializationStream(
   private[this] var kryo: Kryo = serInstance.borrowKryo()
 
   override def writeObject[T: ClassTag](t: T): SerializationStream = {
+    SLogger.log("kryo","write")
     kryo.writeClassAndObject(output, t)
     this
   }
@@ -278,6 +279,7 @@ class KryoDeserializationStream(
   private[this] var kryo: Kryo = serInstance.borrowKryo()
 
   override def readObject[T: ClassTag](): T = {
+    SLogger.log("kryo","read")
     try {
       kryo.readClassAndObject(input).asInstanceOf[T]
     } catch {
